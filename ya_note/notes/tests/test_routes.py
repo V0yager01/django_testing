@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.contrib.auth import get_user_model
 
 from notes.models import Note
 
@@ -48,7 +48,7 @@ class TestRoutes(TestCase):
             with self.subTest(name=name):
                 url = reverse(name, args=args)
                 response = self.not_author_client.get(url)
-                self.assertEqual(response.status_code, 404)
+                self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_guest_user_redirect(self):
         urls = (

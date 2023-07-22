@@ -1,8 +1,9 @@
-from pytils.translit import slugify
+from http import HTTPStatus
 
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from pytils.translit import slugify
 
 from notes.forms import WARNING
 from notes.models import Note
@@ -72,7 +73,7 @@ class TestLogic(TestCase):
         self.authorized_client.post(reverse('notes:add'), data=form_data)
         response = self.authorized_client.get(reverse('notes:detail',
                                                       args=(slug,)))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_author_note_edit(self):
         form_data = {
@@ -98,20 +99,22 @@ class TestLogic(TestCase):
                                                                self.note
                                                                .slug}),
                                                data=form_data)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         note = Note.objects.get(slug='slug')
         self.assertEqual(note.title, 'title')
 
     def test_author_can_delete_comment(self):
+        old_count = Note.objects.count()
         self.author_client.delete(reverse('notes:delete',
                                           kwargs={'slug': 'slug'}))
-        notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 0)
+        actual_count = Note.objects.count()
+        self.assertEqual(old_count, actual_count + 1)
 
     def test_user_cant_delete_comment_of_another_user(self):
+        old_count = Note.objects.count()
         response = self.authorized_client.delete(reverse('notes:delete',
                                                          kwargs={'slug':
                                                                  'slug'}))
-        self.assertEqual(response.status_code, 404)
-        comments_count = Note.objects.count()
-        self.assertEqual(comments_count, 1)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        actual_count = Note.objects.count()
+        self.assertEqual(old_count, actual_count)

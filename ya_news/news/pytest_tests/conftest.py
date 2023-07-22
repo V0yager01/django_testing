@@ -29,7 +29,7 @@ def news_list(db):
     now = datetime.now()
     for index in range(MODEL_COUNT):
         news = News(title=f'Новость {index}', text='Just a text')
-        news.created = now + timedelta(days=index)
+        news.date = now + timedelta(days=index)
         all_news.append(news)
     return News.objects.bulk_create(all_news)
 

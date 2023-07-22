@@ -1,9 +1,8 @@
 from http import HTTPStatus
 
 import pytest
-
-from pytest_django.asserts import assertRedirects
 from django.urls import reverse
+from pytest_django.asserts import assertRedirects
 
 
 def test_home_availability_for_anonymous_user(client, db):

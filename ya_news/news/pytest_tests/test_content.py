@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
+from django.utils import timezone
 from django.urls import reverse
 
 from news.forms import CommentForm
@@ -7,6 +8,8 @@ from news.models import Comment
 
 
 NEWS_COUNT = 10
+
+FORM = 'form'
 
 
 def test_page_contains_ten_news(client, news_list):
@@ -25,7 +28,7 @@ def test_page_contains_sorted_news(client, news_list):
 
 
 def test_comments_are_sorted(client, author, news):
-    now = datetime.now()
+    now = timezone.now()
     for index in range(2):
         comment = Comment.objects.create(author=author, text='Just a text',
                                          news=news)
@@ -34,19 +37,18 @@ def test_comments_are_sorted(client, author, news):
 
     url = reverse('news:detail', args=(news.id,))
     response = client.get(url)
-    news = response.context['news']
-    all_comments = news.comment_set.all()
-    assert all_comments[0].created < all_comments[1].created
+    first, second = response.context['news'].comment_set.all()
+    assert first.created < second.created
 
 
 def test_autorized_client_has_form(author_client, news):
     url = reverse('news:detail', args=(news.id,))
     response = author_client.get(url)
-    assert 'form' in response.context
-    assert isinstance(response.context['form'], CommentForm)
+    assert FORM in response.context
+    assert isinstance(response.context[FORM], CommentForm)
 
 
 def test_guest_client_has_not_form(client, news):
     url = reverse('news:detail', args=(news.id,))
     response = client.get(url)
-    assert 'form' not in response.context
+    assert FORM not in response.context
