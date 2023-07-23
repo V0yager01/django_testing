@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from django.utils import timezone
 from django.urls import reverse
 
 from news.forms import CommentForm
@@ -28,13 +27,11 @@ def test_page_contains_sorted_news(client, news_list):
 
 
 def test_comments_are_sorted(client, author, news):
-    now = timezone.now()
     for index in range(2):
         comment = Comment.objects.create(author=author, text='Just a text',
                                          news=news)
-        comment.created = now + timedelta(days=index)
+        comment.created = comment.created + timedelta(days=index)
         comment.save()
-
     url = reverse('news:detail', args=(news.id,))
     response = client.get(url)
     first, second = response.context['news'].comment_set.all()

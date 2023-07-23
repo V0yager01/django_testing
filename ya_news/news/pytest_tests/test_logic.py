@@ -64,7 +64,6 @@ def test_bad_words_filter(news, author_client):
                     .select_related('news')
                     .filter(news=news)
                     .count())
-    print(bad_word, response.context['form'].errors)
     assert 'Не ругайтесь!' == response.context['form'].errors['text'][0]
     assert comment_count == actual_count
 
